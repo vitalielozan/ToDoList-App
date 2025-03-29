@@ -100,3 +100,5 @@ async function deleteTasks(taskId) {
     console.error('Error deleting task from server', error);
   }
 }
+
+loadData();
