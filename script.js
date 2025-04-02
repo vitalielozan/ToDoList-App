@@ -3,9 +3,8 @@ const taskInput = document.querySelector('#taskInput');
 const taskInputDate = document.querySelector('#inputDate');
 const taskList = document.querySelector('#taskList');
 const container = document.querySelector('#container');
-const btnLoad = document.querySelector('#btnLoad');
 
-btnLoad.addEventListener('click', loadData);
+window.addEventListener('load', loadData);
 async function loadData() {
   try {
     const res = await fetch('http://localhost:4000/tasks');
@@ -14,19 +13,40 @@ async function loadData() {
     taskList.innerHTML = '';
     result.forEach((item) => {
       const listItem = document.createElement('li');
-      listItem.innerHTML = `${item.task} - ${item.data}<i class="bi bi-trash3-fill"></i>`;
+      listItem.innerHTML = `<input type='checkbox' id='task-${item.id}' name='task-${item.id}' value='task-${item.id}'>
+                            <label for='task-${item.id}'>${item.task} - ${item.data}</label>
+                            <i class="bi bi-trash3-fill"></i>`;
       taskList.appendChild(listItem);
       listItem.setAttribute('class', 'my-3 bg-success text-white');
       listItem.setAttribute('id', `${item.id}`);
 
+      const checkbox = listItem.querySelector('input[type="checkbox"]');
+      checkbox.checked = item.isComplete;
+      const label = listItem.querySelector('label');
+      if (item.isComplete) {
+        label.classList.add('comleted');
+      }
+      checkbox.addEventListener('change', async () => {
+        const newStatus = checkbox.checked;
+        await fetch(`http://localhost:4000/tasks/${item.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ isComplete: newStatus }),
+        });
+        if (newStatus) {
+          label.classList.add('completed');
+        } else {
+          label.classList.remove('completed');
+        }
+      });
       const deleteButton = listItem.querySelector('i');
       deleteButton.addEventListener('click', async () => {
         await deleteTasks(item.id);
-        taskList.removeChild(listItem);
-      });
-
-      listItem.addEventListener('click', () => {
-        listItem.classList.toggle('completed');
+        if (listItem && taskList.contains(listItem)) {
+          taskList.removeChild(listItem);
+        }
       });
     });
   } catch (error) {
@@ -35,7 +55,6 @@ async function loadData() {
 }
 
 btnAddTask.addEventListener('click', addTasks);
-
 async function addTasks() {
   let taskText = taskInput.value.trim();
   let taskDate = taskInputDate.value;
@@ -45,29 +64,50 @@ async function addTasks() {
     return;
   }
 
+  const newTask = await addDataToJson(taskText, taskDate);
+  if (!newTask || !newTask.id) {
+    console.error('Task-ul nu a fost salvat în server.');
+    return;
+  }
+
   let li = document.createElement('li');
-  taskList.appendChild(li);
-  li.textContent = `${taskText} - ${taskDate}`;
+  li.innerHTML = `<input type='checkbox' id='task-${newTask.id}' name='task-${newTask.id}' value='task-${newTask.id}'>
+                    <label for='task-${newTask.id}'>${taskText} - ${taskDate}</label>`;
   li.setAttribute('class', 'my-3 bg-success text-white');
-  li.addEventListener('click', () => {
-    li.classList.toggle('completed');
+  li.setAttribute('id', newTask.id);
+
+  const checkbox = li.querySelector('input[type="checkbox"]');
+  let label = li.querySelector('label');
+  checkbox.checked = false;
+  checkbox.addEventListener('change', async () => {
+    const newStatus = checkbox.checked;
+    await fetch(`http://localhost:4000/tasks/${newTask.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ isComplete: newStatus }),
+    });
+    if (newStatus) {
+      label.classList.add('completed');
+    } else {
+      label.classList.remove('completed');
+    }
   });
 
   let deleteButton = document.createElement('i');
   li.appendChild(deleteButton);
   deleteButton.setAttribute('class', 'bi bi-trash3-fill');
-  deleteButton.addEventListener('click', () => {
-    taskList.removeChild(li);
+  deleteButton.addEventListener('click', async () => {
+    await deleteTasks(newTask.id);
+    if (li && taskList.contains(li)) {
+      taskList.removeChild(li);
+    }
   });
 
+  taskList.appendChild(li);
   taskInput.value = '';
   taskInputDate.value = '';
-
-  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  tasks.push({ task: taskText, date: taskDate });
-  localStorage.setItem('tasks', JSON.stringify(tasks));
-
-  await addDataToJson(taskText, taskDate);
 }
 
 async function addDataToJson(task, taskDate) {
@@ -75,6 +115,7 @@ async function addDataToJson(task, taskDate) {
     const taskData = {
       task: task,
       data: taskDate,
+      isComlete: false,
     };
     const response = await fetch('http://localhost:4000/tasks', {
       method: 'POST',
@@ -83,8 +124,9 @@ async function addDataToJson(task, taskDate) {
       },
       body: JSON.stringify(taskData),
     });
-    await response.json();
+    const newTask = await response.json();
     alert('Date salvate');
+    return newTask;
   } catch (error) {
     console.error('Error', error);
   }
@@ -93,9 +135,7 @@ async function addDataToJson(task, taskDate) {
 async function deleteTasks(taskId) {
   try {
     await fetch(`http://localhost:4000/tasks/${taskId}`, { method: 'DELETE' });
-    taskList.innerHTML = '';
-    localStorage.removeItem('tasks');
-    console.log(`Task ${taskId} deleted from server`);
+    alert(`Task ${taskId} deleted from server`);
   } catch (error) {
     console.error('Error deleting task from server', error);
   }
