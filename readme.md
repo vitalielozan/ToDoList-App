@@ -12,3 +12,7 @@
 - CSS
 - JAVACRIPT
 - JSON-SERVER
+
+Starting server:
+
+- npm run start

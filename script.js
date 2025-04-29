@@ -7,7 +7,7 @@ const container = document.querySelector('#container');
 window.addEventListener('load', loadData);
 async function loadData() {
   try {
-    const res = await fetch('http://localhost:4000/tasks');
+    const res = await fetch('http://localhost:3001/tasks');
     const result = await res.json();
     console.log(result);
     taskList.innerHTML = '';
@@ -28,7 +28,7 @@ async function loadData() {
       }
       checkbox.addEventListener('change', async () => {
         const newStatus = checkbox.checked;
-        await fetch(`http://localhost:4000/tasks/${item.id}`, {
+        await fetch(`http://localhost:3001/tasks/${item.id}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ async function addTasks() {
   checkbox.checked = false;
   checkbox.addEventListener('change', async () => {
     const newStatus = checkbox.checked;
-    await fetch(`http://localhost:4000/tasks/${newTask.id}`, {
+    await fetch(`http://localhost:3001/tasks/${newTask.id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ async function addDataToJson(task, taskDate) {
       data: taskDate,
       isComlete: false,
     };
-    const response = await fetch('http://localhost:4000/tasks', {
+    const response = await fetch('http://localhost:3001/tasks', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ async function addDataToJson(task, taskDate) {
 
 async function deleteTasks(taskId) {
   try {
-    await fetch(`http://localhost:4000/tasks/${taskId}`, { method: 'DELETE' });
+    await fetch(`http://localhost:3001/tasks/${taskId}`, { method: 'DELETE' });
     alert(`Task ${taskId} deleted from server`);
   } catch (error) {
     console.error('Error deleting task from server', error);
