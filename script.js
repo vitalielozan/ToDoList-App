@@ -14,17 +14,17 @@ async function loadData() {
     result.forEach((item) => {
       const listItem = document.createElement('li');
       listItem.innerHTML = `<input type='checkbox' id='task-${item.id}' name='task-${item.id}' value='task-${item.id}'>
-                            <label for='task-${item.id}'>${item.task} - ${item.data}</label>
+                            <label for='task-${item.id}'><span class="task-text">${item.task} - ${item.data}</span></label>
                             <i class="bi bi-trash3-fill"></i>`;
       taskList.appendChild(listItem);
       listItem.setAttribute('class', 'my-3 bg-success text-white');
       listItem.setAttribute('id', `${item.id}`);
 
       const checkbox = listItem.querySelector('input[type="checkbox"]');
-      checkbox.checked = item.isComplete;
-      const label = listItem.querySelector('label');
-      if (item.isComplete) {
-        label.classList.add('comleted');
+      let textSpan = listItem.querySelector('.task-text');
+      checkbox.checked = item.isComplete || false;
+      if (checkbox.checked) {
+        textSpan.classList.add('completed');
       }
       checkbox.addEventListener('change', async () => {
         const newStatus = checkbox.checked;
@@ -36,9 +36,9 @@ async function loadData() {
           body: JSON.stringify({ isComplete: newStatus }),
         });
         if (newStatus) {
-          label.classList.add('completed');
+          textSpan.classList.add('completed');
         } else {
-          label.classList.remove('completed');
+          textSpan.classList.remove('completed');
         }
       });
       const deleteButton = listItem.querySelector('i');
@@ -72,13 +72,18 @@ async function addTasks() {
 
   let li = document.createElement('li');
   li.innerHTML = `<input type='checkbox' id='task-${newTask.id}' name='task-${newTask.id}' value='task-${newTask.id}'>
-                    <label for='task-${newTask.id}'>${taskText} - ${taskDate}</label>`;
+                    <label for='task-${newTask.id}'><span class="task-text">${taskText} - ${taskDate}</span></label>`;
   li.setAttribute('class', 'my-3 bg-success text-white');
   li.setAttribute('id', newTask.id);
 
   const checkbox = li.querySelector('input[type="checkbox"]');
-  let label = li.querySelector('label');
-  checkbox.checked = false;
+  const textSpan = li.querySelector('.task-text');
+  checkbox.checked = newTask.isComplete || false;
+
+  if (checkbox.checked) {
+    textSpan.classList.add('completed');
+  }
+
   checkbox.addEventListener('change', async () => {
     const newStatus = checkbox.checked;
     await fetch(`http://localhost:3001/tasks/${newTask.id}`, {
@@ -89,9 +94,9 @@ async function addTasks() {
       body: JSON.stringify({ isComplete: newStatus }),
     });
     if (newStatus) {
-      label.classList.add('completed');
+      textSpan.classList.add('completed');
     } else {
-      label.classList.remove('completed');
+      textSpan.classList.remove('completed');
     }
   });
 
@@ -115,7 +120,7 @@ async function addDataToJson(task, taskDate) {
     const taskData = {
       task: task,
       data: taskDate,
-      isComlete: false,
+      isComplete: false,
     };
     const response = await fetch('http://localhost:3001/tasks', {
       method: 'POST',

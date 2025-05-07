@@ -3,9 +3,8 @@
     {
       "task": "Termin medic",
       "data": "2025-05-09",
-      "isComlete": false,
-      "id": 1,
-      "isComplete": true
+      "isComplete": true,
+      "id": 1
     }
   ]
 }
