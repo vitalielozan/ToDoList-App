@@ -2,14 +2,12 @@ const btnAddTask = document.querySelector('#btnAdd');
 const taskInput = document.querySelector('#taskInput');
 const taskInputDate = document.querySelector('#inputDate');
 const taskList = document.querySelector('#taskList');
-const container = document.querySelector('#container');
 
 window.addEventListener('load', loadData);
 async function loadData() {
   try {
     const res = await fetch('http://localhost:3001/tasks');
     const result = await res.json();
-    console.log(result);
     taskList.innerHTML = '';
     result.forEach((item) => {
       const listItem = document.createElement('li');
@@ -60,13 +58,13 @@ async function addTasks() {
   let taskDate = taskInputDate.value;
 
   if (taskText === '' || taskDate === '') {
-    alert('Va rog adaugati o sarcina si o data!');
+    alert('Please add a task and a date!');
     return;
   }
 
   const newTask = await addDataToJson(taskText, taskDate);
   if (!newTask || !newTask.id) {
-    console.error('Task-ul nu a fost salvat în server.');
+    console.error('The task was not saved to the server.');
     return;
   }
 
@@ -77,7 +75,7 @@ async function addTasks() {
   li.setAttribute('id', newTask.id);
 
   const checkbox = li.querySelector('input[type="checkbox"]');
-  const textSpan = li.querySelector('.task-text');
+  let textSpan = li.querySelector('.task-text');
   checkbox.checked = newTask.isComplete || false;
 
   if (checkbox.checked) {
@@ -130,7 +128,7 @@ async function addDataToJson(task, taskDate) {
       body: JSON.stringify(taskData),
     });
     const newTask = await response.json();
-    alert('Date salvate');
+    alert('Data is saved!');
     return newTask;
   } catch (error) {
     console.error('Error', error);

@@ -1,9 +1,9 @@
 {
   "tasks": [
     {
-      "task": "Termin medic",
-      "data": "2025-05-09",
-      "isComplete": true,
+      "task": "Enkaufen fahren.",
+      "data": "2025-05-29",
+      "isComplete": false,
       "id": 1
     }
   ]
